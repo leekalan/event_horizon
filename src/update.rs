@@ -1,6 +1,6 @@
 pub trait Updatable: Default {
     type Update;
-    type ValidState;
+    type Interface;
 
-    fn update(&mut self, update: Self::Update) -> Option<Self::ValidState>;
+    fn update(&mut self, update: Self::Update) -> Self::Interface;
 }

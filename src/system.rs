@@ -1,14 +1,22 @@
 use crate::update::Updatable;
 
 pub trait System {
+    type Dispatcher: System;
     type State: Updatable;
     type Return;
 
     fn get_state(&mut self) -> &mut Self::State;
-    fn execute(state: <Self::State as Updatable>::ValidState) -> Self::Return;
+    fn execute(
+        dispatcher: &mut Self::Dispatcher,
+        state: <Self::State as Updatable>::Interface,
+    ) -> Self::Return;
 
-    fn post(&mut self, update: <Self::State as Updatable>::Update) -> Option<Self::Return> {
+    fn post(
+        &mut self,
+        dispatcher: &mut Self::Dispatcher,
+        update: <Self::State as Updatable>::Update,
+    ) -> Self::Return {
         let state = self.get_state();
-        state.update(update).map(Self::execute)
+        Self::execute(dispatcher, state.update(update))
     }
 }
