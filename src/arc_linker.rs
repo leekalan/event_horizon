@@ -1,6 +1,9 @@
 pub mod arc_linked;
 
-use std::{ops::Deref, sync::{Arc, Mutex, MutexGuard}};
+use std::{
+    ops::Deref,
+    sync::{Arc, Mutex, MutexGuard},
+};
 
 use self::arc_linked::ArcLinked;
 

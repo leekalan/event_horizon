@@ -8,6 +8,8 @@ pub mod view;
 #[cfg(test)]
 mod tests {
 
+    use std::{cell::RefCell, rc::Rc, thread};
+
     use crate::{
         rc_linker::RcLinker,
         receive::Receive,
@@ -43,55 +45,77 @@ mod tests {
             }
         }
 
-        let player = Player { health: 100 };
-        let shielded = Shielded { shielded: false };
+        let player = Rc::new(RefCell::new(Player { health: 100 }));
+        let shielded = Rc::new(RefCell::new(Shielded { shielded: false }));
 
-        let player_linker = RcLinker::new(player);
-        let shielded_linker = RcLinker::new(shielded);
+        let player_linker = RcLinker::new(player.clone());
+        let shielded_linker = RcLinker::new(shielded.clone());
 
         let shielded_router = Router::new(shielded_linker.linked());
 
         let mut router = Router::new(player_linker.linked());
 
-        println!(
-            "health: {}, shielded: {}",
-            player_linker.borrow().as_ref().unwrap().health,
-            shielded_linker.borrow().as_ref().unwrap().shielded,
-        );
+        assert_eq!(player.borrow().health, 100);
+        assert!(!shielded.borrow().shielded);
 
         router.send(-10);
 
-        println!(
-            "health: {}, shielded: {}",
-            player_linker.borrow().as_ref().unwrap().health,
-            shielded_linker.borrow().as_ref().unwrap().shielded,
-        );
+        assert_eq!(player.borrow().health, 90);
+        assert!(!shielded.borrow().shielded);
 
         router.intercept(Box::new(shielded_router));
         router.send(-5);
 
-        println!(
-            "health: {}, shielded: {}",
-            player_linker.borrow().as_ref().unwrap().health,
-            shielded_linker.borrow().as_ref().unwrap().shielded,
-        );
+        assert_eq!(player.borrow().health, 85);
+        assert!(!shielded.borrow().shielded);
 
-        shielded_linker.borrow_mut().as_mut().unwrap().shielded = true;
+        shielded.borrow_mut().shielded = true;
         router.send(-20);
 
-        println!(
-            "health: {}, shielded: {}",
-            player_linker.borrow().as_ref().unwrap().health,
-            shielded_linker.borrow().as_ref().unwrap().shielded,
-        );
+        assert_eq!(player.borrow().health, 85);
+        assert!(shielded.borrow().shielded);
 
-        shielded_linker.borrow_mut().as_mut().unwrap().shielded = false;
+        shielded.borrow_mut().shielded = false;
         router.send(-20);
 
-        println!(
-            "health: {}, shielded: {}",
-            player_linker.borrow().as_ref().unwrap().health,
-            shielded_linker.borrow().as_ref().unwrap().shielded,
-        );
+        assert_eq!(player.borrow().health, 65);
+        assert!(!shielded.borrow().shielded);
+    }
+
+    #[test]
+    fn multi_threaded() {
+        struct A(i32);
+        struct B(i32);
+
+        struct PassAndPrint;
+        impl Receive<A> for PassAndPrint {
+            type Output = thread::JoinHandle<i32>;
+
+            fn send(&mut self, event: A) -> Option<Self::Output> {
+                Some(thread::spawn(move || {
+                    thread::sleep(std::time::Duration::from_millis(1000));
+                    event.0
+                }))
+            }
+        }
+        impl Receive<B> for PassAndPrint {
+            type Output = thread::JoinHandle<i32>;
+
+            fn send(&mut self, event: B) -> Option<Self::Output> {
+                Some(thread::spawn(move || {
+                    thread::sleep(std::time::Duration::from_millis(1000));
+                    event.0
+                }))
+            }
+        }
+
+        let mut router_a = Router::new(PassAndPrint);
+        let mut router_b = Router::new(PassAndPrint);
+
+        let a = router_a.send(A(1)).unwrap();
+        let b = router_b.send(B(2)).unwrap();
+
+        assert_eq!(a.join().unwrap(), 1);
+        assert_eq!(b.join().unwrap(), 2);
     }
 }
