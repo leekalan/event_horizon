@@ -23,6 +23,14 @@ impl<E, R: Receive<E>> Router<E, R> {
             reciever,
         }
     }
+
+    pub fn get_reciever(&self) -> &R {
+        &self.reciever
+    }
+
+    pub fn get_intercept(&self) -> Option<&dyn Route<E, Output = E>> {
+        self.intercept.as_ref().map(Box::as_ref)
+    }
 }
 
 impl<E, R: Receive<E>> Receive<E> for Router<E, R> {

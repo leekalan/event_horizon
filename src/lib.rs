@@ -1,16 +1,15 @@
-pub mod arc_link;
+pub mod arc_linker;
 pub mod exposed;
-pub mod rc_link;
+pub mod rc_linker;
 pub mod receive;
 pub mod router;
 pub mod view;
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, rc::Rc};
 
     use crate::{
-        rc_link::RcLink,
+        rc_linker::RcLinker,
         receive::Receive,
         router::{Route, Router},
     };
@@ -44,28 +43,28 @@ mod tests {
             }
         }
 
-        let player = Rc::new(RefCell::new(Player { health: 100 }));
-        let shielded = Rc::new(RefCell::new(Shielded { shielded: false }));
+        let player = Player { health: 100 };
+        let shielded = Shielded { shielded: false };
 
-        let player_link = RcLink::new(player.clone());
-        let shielded_link = RcLink::new(shielded.clone());
+        let player_linker = RcLinker::new(player);
+        let shielded_linker = RcLinker::new(shielded);
 
-        let shielded_router = Router::new(shielded_link.receiver());
+        let shielded_router = Router::new(shielded_linker.linked());
 
-        let mut router = Router::new(player_link.receiver());
+        let mut router = Router::new(player_linker.linked());
 
         println!(
             "health: {}, shielded: {}",
-            player.borrow().health,
-            shielded.borrow().shielded
+            player_linker.borrow().as_ref().unwrap().health,
+            shielded_linker.borrow().as_ref().unwrap().shielded,
         );
 
         router.send(-10);
 
         println!(
             "health: {}, shielded: {}",
-            player.borrow().health,
-            shielded.borrow().shielded
+            player_linker.borrow().as_ref().unwrap().health,
+            shielded_linker.borrow().as_ref().unwrap().shielded,
         );
 
         router.intercept(Box::new(shielded_router));
@@ -73,26 +72,26 @@ mod tests {
 
         println!(
             "health: {}, shielded: {}",
-            player.borrow().health,
-            shielded.borrow().shielded
+            player_linker.borrow().as_ref().unwrap().health,
+            shielded_linker.borrow().as_ref().unwrap().shielded,
         );
 
-        shielded.borrow_mut().shielded = true;
+        shielded_linker.borrow_mut().as_mut().unwrap().shielded = true;
         router.send(-20);
 
         println!(
             "health: {}, shielded: {}",
-            player.borrow().health,
-            shielded.borrow().shielded
+            player_linker.borrow().as_ref().unwrap().health,
+            shielded_linker.borrow().as_ref().unwrap().shielded,
         );
 
-        shielded.borrow_mut().shielded = false;
+        shielded_linker.borrow_mut().as_mut().unwrap().shielded = false;
         router.send(-20);
 
         println!(
             "health: {}, shielded: {}",
-            player.borrow().health,
-            shielded.borrow().shielded
+            player_linker.borrow().as_ref().unwrap().health,
+            shielded_linker.borrow().as_ref().unwrap().shielded,
         );
     }
 }
