@@ -10,11 +10,11 @@ pub struct Router<E, R: Receive<E>> {
 }
 
 impl<E, R: Receive<E>> Router<E, R> {
-    pub fn new(reciever: R) -> Box<Self> {
-        Box::new(Self {
+    pub fn new(reciever: R) -> Self {
+        Self {
             intercept: None,
             reciever,
-        })
+        }
     }
 
     pub fn with_intercept(intercept: Box<dyn Route<E, Output = E>>, reciever: R) -> Self {
