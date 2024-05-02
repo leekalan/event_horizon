@@ -18,15 +18,6 @@ impl<R> RcLinker<R> {
         }
     }
 
-    pub fn default_instance() -> Self
-    where
-        R: Default,
-    {
-        Self {
-            receiver: Rc::new(RefCell::new(Some(Default::default()))),
-        }
-    }
-
     pub fn get_reciever(&self) -> &RefCell<Option<R>> {
         self
     }
