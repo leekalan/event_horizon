@@ -12,7 +12,7 @@ mod tests {
     use crate::{
         rc_link::RcLink,
         receive::Receive,
-        router::Router,
+        router::{Route, Router},
     };
 
     #[test]
@@ -52,7 +52,7 @@ mod tests {
 
         let shielded_router = Router::new(shielded_link.receiver());
 
-        let mut router = Router::with_intercept(Box::new(shielded_router), player_link.receiver());
+        let mut router = Router::new(player_link.receiver());
 
         println!(
             "health: {}, shielded: {}",
@@ -68,6 +68,7 @@ mod tests {
             shielded.borrow().shielded
         );
 
+        router.intercept(Box::new(shielded_router));
         router.send(-5);
 
         println!(
