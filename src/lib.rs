@@ -200,4 +200,53 @@ mod tests {
 
         drop(player_collin_linker);
     }
+
+    #[test]
+    fn nested_intercepts() {
+        struct Reader {
+            name: String,
+        }
+        impl Receive<i32> for Reader {
+            type Output = i32;
+            
+            fn send(&mut self, event: i32) -> ReceiverResult<i32, Self::Output> {
+                println!("Reader: {} received event: {}", self.name, event);
+                ReceiverResult::Continue(event)
+            }
+        }
+
+        let reader_a = RcLinker::new(Reader {
+            name: "A".to_string(),
+        });
+        let reader_b = RcLinker::new(Reader {
+            name: "B".to_string(),
+        });
+        let reader_c = RcLinker::new(Reader {
+            name: "C".to_string(),
+        });
+
+        let mut router = Router::new(reader_a.linked());
+
+        assert!(router.send(10).is_continue());
+
+        router.intercept_from_receiver(reader_c.linked());
+
+        assert!(router.send(20).is_continue());
+
+        router.intercept_at_root_from_receiver(reader_b.linked());
+
+        assert!(router.send(30).is_continue());
+
+        drop(reader_b);
+
+        assert!(router.send(40).is_continue());
+
+        drop(reader_c);
+
+        assert!(router.send(50).is_continue());
+
+        drop(reader_a);
+
+        assert!(router.send(60).is_delete());
+    }
 }

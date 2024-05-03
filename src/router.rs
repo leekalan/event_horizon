@@ -10,6 +10,17 @@ pub trait Route<E>: Receive<E> {
     fn intercept(&mut self, intercept: Box<dyn Route<E, Output = E>>);
 
     fn take_intercept(&mut self) -> Option<Box<dyn Route<E, Output = E>>>;
+
+    fn intercept_at_root(&mut self, intercept: Box<dyn Route<E, Output = E>>) {
+        let old_intercept = self.take_intercept();
+        match old_intercept {
+            Some(r) => {
+                self.intercept(intercept);
+                self.intercept(r);
+            },
+            None => self.intercept(intercept),
+        }
+    }
 }
 
 pub struct Router<E, R: Receive<E>> {
@@ -97,6 +108,14 @@ impl<E, R: Receive<E>> Router<E, R> {
     {
         let intercept = Box::new(Router::new(intercept));
         self.intercept(intercept);
+    }
+
+    pub fn intercept_at_root_from_receiver(&mut self, intercept: impl Receive<E, Output = E> + 'static)
+    where
+        E: 'static,
+    {
+        let intercept = Box::new(Router::new(intercept));
+        self.intercept_at_root(intercept);
     }
 }
 
