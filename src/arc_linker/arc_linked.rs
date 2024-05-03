@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use crate::{
-    receive::Receive,
+    receive::{Receive, ReceiverResult},
     view::{DeleteView, View},
 };
 
@@ -19,8 +19,11 @@ impl<R> ArcLinked<R> {
 impl<E, R: Receive<E>> Receive<E> for ArcLinked<R> {
     type Output = R::Output;
 
-    fn send(&mut self, event: E) -> Option<Self::Output> {
-        self.link.lock().unwrap().as_mut()?.send(event)
+    fn send(&mut self, event: E) -> ReceiverResult<E, Self::Output> {
+        match self.link.lock().unwrap().as_mut() {
+            Some(t0) => t0.send(event),
+            None => ReceiverResult::Delete(event),
+        }
     }
 }
 

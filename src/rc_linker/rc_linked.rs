@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use crate::{
-    receive::Receive,
+    receive::{Receive, ReceiverResult},
     view::{DeleteView, View},
 };
 
@@ -19,8 +19,11 @@ impl<R> RcLinked<R> {
 impl<E, R: Receive<E>> Receive<E> for RcLinked<R> {
     type Output = R::Output;
 
-    fn send(&mut self, event: E) -> Option<Self::Output> {
-        self.link.borrow_mut().as_mut()?.send(event)
+    fn send(&mut self, event: E) -> ReceiverResult<E, Self::Output> {
+        match self.link.borrow_mut().as_mut() {
+            Some(t0) => t0.send(event),
+            None => ReceiverResult::Delete(event),
+        }
     }
 }
 

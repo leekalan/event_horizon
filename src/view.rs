@@ -1,4 +1,8 @@
-use std::{cell::RefCell, rc::Rc, sync::{Arc, Mutex, RwLock}};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+    sync::{Arc, Mutex, RwLock},
+};
 
 pub trait View<E> {
     fn view(&mut self, event: &E) -> Option<DeleteView>;
