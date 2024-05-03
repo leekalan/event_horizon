@@ -17,7 +17,7 @@ pub trait Route<E>: Receive<E> {
             Some(r) => {
                 self.intercept(intercept);
                 self.intercept(r);
-            },
+            }
             None => self.intercept(intercept),
         }
     }
@@ -110,8 +110,10 @@ impl<E, R: Receive<E>> Router<E, R> {
         self.intercept(intercept);
     }
 
-    pub fn intercept_at_root_from_receiver(&mut self, intercept: impl Receive<E, Output = E> + 'static)
-    where
+    pub fn intercept_at_root_from_receiver(
+        &mut self,
+        intercept: impl Receive<E, Output = E> + 'static,
+    ) where
         E: 'static,
     {
         let intercept = Box::new(Router::new(intercept));

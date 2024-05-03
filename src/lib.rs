@@ -5,10 +5,10 @@
 //! The library consists of 2 traits:
 //! - [`Receive`][`receive::Receive`]: a generic interface for sending events
 //! - [`View`][`view::View`]: a generic interface for viewing events
-//! 
+//!
 //! Viewer return;
 //! - [`DeleteView`][`view::DeleteView`]: flag to delete the viewer
-//! 
+//!
 //! Receiver return, [`ReceiverResult`][`receive::ReceiverResult`]:
 //! - [`Continue`][`receive::ReceiverResult::Continue`]: continue processing the output as normal (like [`Some`])
 //! - [`Stop`][`receive::ReceiverResult::Stop`]: stop processing the output (like [`None`]`)
@@ -208,7 +208,7 @@ mod tests {
         }
         impl Receive<i32> for Reader {
             type Output = i32;
-            
+
             fn send(&mut self, event: i32) -> ReceiverResult<i32, Self::Output> {
                 println!("Reader: {} received event: {}", self.name, event);
                 ReceiverResult::Continue(event)
