@@ -1,6 +1,10 @@
 use counted_map::ReassignableCountedMap;
 
-use crate::{exposed::Exposed, receive::{Receive, ReceiverResult}, view::View};
+use crate::{
+    exposed::Exposed,
+    receive::{Receive, ReceiverResult},
+    view::View,
+};
 
 pub trait Route<E>: Receive<E> {
     fn intercept(&mut self, intercept: Box<dyn Route<E, Output = E>>);
@@ -108,11 +112,11 @@ impl<E, R: Receive<E>> Receive<E> for Router<E, R> {
                     match old_intercept.take_intercept() {
                         Some(new_intercept) => {
                             self.intercept(new_intercept);
-                        },
+                        }
                         None => self.intercept = None,
                     }
                     event
-                },
+                }
             }
         } else {
             event
@@ -129,7 +133,7 @@ impl<E, R: Receive<E>> Route<E> for Router<E, R> {
             None => self.intercept = Some(intercept),
         }
     }
-    
+
     fn take_intercept(&mut self) -> Option<Box<dyn Route<E, Output = E>>> {
         self.intercept.take()
     }

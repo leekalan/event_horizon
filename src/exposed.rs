@@ -1,6 +1,9 @@
 use counted_map::ReassignableCountedMap;
 
-use crate::{receive::{Receive, ReceiverResult}, view::View};
+use crate::{
+    receive::{Receive, ReceiverResult},
+    view::View,
+};
 
 pub struct Exposed<E, R: Receive<E>> {
     viewers: ReassignableCountedMap<usize, Box<dyn View<E>>>,

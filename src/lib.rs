@@ -26,7 +26,12 @@ pub mod view;
 mod tests {
     use std::{cell::RefCell, rc::Rc, thread};
 
-    use crate::{rc_linker::RcLinker, receive::{Receive, ReceiverResult}, router::Router, view::View};
+    use crate::{
+        rc_linker::RcLinker,
+        receive::{Receive, ReceiverResult},
+        router::Router,
+        view::View,
+    };
 
     #[test]
     fn player_health() {
@@ -85,7 +90,7 @@ mod tests {
         assert_eq!(player.borrow().health, 85);
         assert!(shielded.borrow().shielded);
 
-        drop(shielded);
+        drop(shielded_linker);
         router.send(-20);
 
         assert_eq!(player.borrow().health, 65);
