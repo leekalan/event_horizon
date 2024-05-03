@@ -5,6 +5,16 @@
 //! The library consists of 2 traits:
 //! - [`Receive`][`receive::Receive`]: a generic interface for sending events
 //! - [`View`][`view::View`]: a generic interface for viewing events
+//! 
+//! Viewer return;
+//! - [`DeleteView`][`view::DeleteView`]: flag to delete the viewer
+//! 
+//! Receiver return, [`ReceiverResult`][`receive::ReceiverResult`]:
+//! - [`Continue`][`receive::ReceiverResult::Continue`]: continue processing the output as normal (like [`Some`])
+//! - [`Stop`][`receive::ReceiverResult::Stop`]: stop processing the output (like [`None`]`)
+//! - [`Delete`][`receive::ReceiverResult::Delete`]: gives back the event with the flag that the receiver should be
+//! deleted, this is specifically for communication with routers so that intercepts can be cleanly destructed while
+//! letting the event pass through
 //!
 //! The different ways to store receivers and viewers are:
 //! - [`RcLinker`][`rc_linker::RcLinker`] and [`ArcLinker`][`arc_linker::ArcLinker`]:
