@@ -48,7 +48,7 @@ impl<E, R: Receive<E>> Receive<E> for Exposed<E, R> {
         let mut deleted = Vec::new();
 
         for (id, viewer) in self.viewers.iter_mut() {
-            if viewer.view(&event).is_none() {
+            if viewer.view(&event).is_some() {
                 deleted.push(*id);
             }
         }

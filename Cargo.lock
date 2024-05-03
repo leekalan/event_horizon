@@ -10,9 +10,9 @@ checksum = "f1fdabc7756949593fe60f30ec81974b613357de856987752631dea1e3394c80"
 
 [[package]]
 name = "counted_map"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51207f7df2b2be84bfcdc75f9e4f361fcf48dfd77d6006773620c40b4d0cb1de"
+checksum = "7363ce5010261bc5086d2a79f706b8a562a6d50c622e850135741815b00e15c2"
 dependencies = [
  "num-bigint",
 ]

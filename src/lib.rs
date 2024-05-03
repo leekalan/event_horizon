@@ -10,9 +10,11 @@ mod tests {
     use std::{cell::RefCell, rc::Rc, thread};
 
     use crate::{
+        exposed::Exposed,
         rc_linker::RcLinker,
         receive::Receive,
         router::{Route, Router},
+        view::View,
     };
 
     #[test]
@@ -116,5 +118,58 @@ mod tests {
 
         assert_eq!(a.join().unwrap(), 1);
         assert_eq!(b.join().unwrap(), 2);
+    }
+
+    #[test]
+    fn drop_test() {
+        struct Player {
+            name: String,
+        }
+        impl Receive<i32> for Player {
+            type Output = ();
+
+            fn send(&mut self, event: i32) -> Option<Self::Output> {
+                println!("Player: {} received event: {}", self.name, event);
+                Some(())
+            }
+        }
+        impl View<i32> for Player {
+            fn view(&mut self, event: &i32) -> Option<crate::view::DeleteView> {
+                println!("Player: {} viewed event: {}", self.name, event);
+                None
+            }
+        }
+
+        let player_amy = Player {
+            name: "Amy".to_string(),
+        };
+
+        let player_bob = Player {
+            name: "Bob".to_string(),
+        };
+
+        let player_amy_linker = RcLinker::new(player_amy);
+        let player_bob_linker = RcLinker::new(player_bob);
+
+        let mut player_amy_router = Router::new(Exposed::new(player_amy_linker.linked()));
+
+        assert!(player_amy_router.send(10).is_some());
+
+        player_amy_router.get_reciever_mut().add_viewer(Box::new(player_bob_linker.linked())).unwrap();
+
+        assert!(player_amy_router.send(20).is_some());
+
+        drop(player_bob_linker);
+
+        assert!(player_amy_router.send(30).is_some());
+
+        drop(player_amy_linker);
+        let player_bob = Player {
+            name: "Bob".to_string(),
+        };
+        let player_bob_linker = RcLinker::new(player_bob);
+        player_amy_router.get_reciever_mut().add_viewer(Box::new(player_bob_linker.linked())).unwrap();
+
+        assert!(player_amy_router.send(40).is_none());
     }
 }

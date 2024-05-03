@@ -28,6 +28,10 @@ impl<E, R: Receive<E>> Router<E, R> {
         &self.reciever
     }
 
+    pub fn get_reciever_mut(&mut self) -> &mut R {
+        &mut self.reciever
+    }
+
     pub fn get_intercept(&self) -> Option<&dyn Route<E, Output = E>> {
         self.intercept.as_ref().map(Box::as_ref)
     }
