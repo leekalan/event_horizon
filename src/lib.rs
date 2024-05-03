@@ -7,7 +7,6 @@ pub mod view;
 
 #[cfg(test)]
 mod tests {
-
     use std::{cell::RefCell, rc::Rc, thread};
 
     use crate::{
