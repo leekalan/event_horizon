@@ -18,12 +18,31 @@
 //!
 //! The different ways to store receivers and viewers are:
 //! - [`RcLinker`][`rc_linker::RcLinker`] and [`ArcLinker`][`arc_linker::ArcLinker`]:
-//! a mutexed container for a type that will invalidate any instances of [`RcLinked`] or [`ArcLinked`]
-//! ready for deletion when dropped, cleaning up any dangling references.
-//! - [`Exposed`][`exposed::Exposed`]: a container for a receiver that allows multiple [`View`][`view::View`]s to be prepended
-//! - [`Router`][`router::Router`]: a container for a receiver that allows another router to intercept the event at the beginning,
-//! by repeating the intercept function it will be delegated to lower routers, allowing a level of abstraction where an intercept
-//! does what is expected without breaking the rest of the route.
+//! a smart pointer that will mark any instances of [`RcLinked`][`rc_linker::rc_linked::RcLinked`] or
+//! [`ArcLinked`][`arc_linker::arc_linked::ArcLinked`] ready for deletion when dropped, cleaning up any
+//! dangling references.
+//! - [`Exposed`][`exposed::Exposed`]: a container for a receiver that allows multiple [`View`][`view::View`]ers to be
+//! prepended
+//! - [`Router`][`router::Router`]: a container for a receiver that allows another router to intercept the event at
+//! the beginning, by repeating the intercept function it will be delegated to lower routers, allowing a level of
+//! abstraction where an intercept does what is expected without breaking the rest of the router.
+//!
+//! ## Aproach
+//!
+//! The receivers function as a sort of lazy garbage collector.
+//!
+//! When receivers flags that they wish to be deleted ([`Delete`][`receive::ReceiverResult::Delete`]), it should
+//! be expected that everything occuring before the introduction of the flag was ran, including viewers and intercepters.
+//!
+//! **This mean if *[`Delete`][`receive::ReceiverResult::Delete`]* is received, it is expected that *all prior systems
+//! have ran* and responsibilty falls upon the receiver to *continue the event propgation with minimal interuptions*.**
+//!
+//! The exception to this is [`Stop`][`receive::ReceiverResult::Stop`], which marks that a decision has been made to exit
+//! the event propgation.
+//!
+//! **This means if *[`Stop`][`receive::ReceiverResult::Stop`]* is received, it is expected that *not all prior systems
+//! have ran* and responsibilty falls upon the reciever to *exit the event propgation with minimal impact*.**
+//!
 
 pub mod arc_linker;
 pub mod exposed;
