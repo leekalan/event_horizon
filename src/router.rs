@@ -119,6 +119,14 @@ impl<E, R: Receive<E>> Router<E, R> {
         let intercept = Box::new(Router::new(intercept));
         self.intercept_at_root(intercept);
     }
+
+    pub fn delete_top_intercept(&mut self) -> Option<Box<dyn Route<E, Output = E>>> {
+        let mut old_intercept = self.take_intercept();
+        if let Some(ref mut intercept) = old_intercept {
+            self.intercept = intercept.take_intercept();
+        }
+        old_intercept
+    }
 }
 
 impl<E, R: Receive<E>> Receive<E> for Router<E, R> {
@@ -129,13 +137,7 @@ impl<E, R: Receive<E>> Receive<E> for Router<E, R> {
                 ReceiverResult::Continue(event) => event,
                 ReceiverResult::Stop => return ReceiverResult::Stop,
                 ReceiverResult::Delete(event) => {
-                    let mut old_intercept = self.take_intercept().unwrap();
-                    match old_intercept.take_intercept() {
-                        Some(new_intercept) => {
-                            self.intercept(new_intercept);
-                        }
-                        None => self.intercept = None,
-                    }
+                    self.delete_top_intercept().unwrap();
                     event
                 }
             }
