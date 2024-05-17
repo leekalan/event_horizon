@@ -592,16 +592,7 @@ mod tests {
         assert!(multi_router.send(-10).is_continue());
         assert_eq!(*multi_router.get_receiver().alive().unwrap(), 80);
 
-        println!(
-            "{}",
-            viewer1_linker
-                .get_receiver()
-                .borrow()
-                .as_ref()
-                .unwrap()
-                .string_vec
-                .join(", ")
-        );
+        println!("{:?}", viewer1_linker);
         drop(viewer1_linker);
 
         let viewer2_linker = RcLinker::new(Viewer2 { count: 0 });
