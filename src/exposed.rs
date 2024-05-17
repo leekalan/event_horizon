@@ -7,26 +7,30 @@ use crate::{
 
 pub struct Exposed<E, R: Receive<E>> {
     viewers: ReassignableCountedMap<usize, Box<dyn View<E>>>,
-    reciever: R,
+    receiver: R,
 }
 
 impl<E, R: Receive<E>> Exposed<E, R> {
-    pub fn new(reciever: R) -> Self {
+    pub fn new(receiver: R) -> Self {
         Self {
             viewers: ReassignableCountedMap::new(),
-            reciever,
+            receiver,
         }
     }
 
     pub fn with_viewers(
         viewers: ReassignableCountedMap<usize, Box<dyn View<E>>>,
-        reciever: R,
+        receiver: R,
     ) -> Self {
-        Self { viewers, reciever }
+        Self { viewers, receiver }
     }
 
-    pub fn get_reciever(&self) -> &R {
-        &self.reciever
+    pub fn get_receiver(&self) -> &R {
+        &self.receiver
+    }
+
+    pub fn get_receiver_mut(&mut self) -> &mut R {
+        &mut self.receiver
     }
 
     pub fn get_viewers(&self) -> &ReassignableCountedMap<usize, Box<dyn View<E>>> {
@@ -67,6 +71,6 @@ impl<E, R: Receive<E>> Receive<E> for Exposed<E, R> {
             self.viewers.remove(id);
         }
 
-        self.reciever.send(event)
+        self.receiver.send(event)
     }
 }

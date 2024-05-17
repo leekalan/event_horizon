@@ -19,7 +19,7 @@ impl<R> ArcLinker<R> {
         }
     }
 
-    pub fn get_reciever(&self) -> &Mutex<Option<R>> {
+    pub fn get_receiver(&self) -> &Mutex<Option<R>> {
         self
     }
 

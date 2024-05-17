@@ -25,21 +25,21 @@ pub trait Route<E>: Receive<E> {
 
 pub struct Router<E, R: Receive<E>> {
     intercept: Option<Box<dyn Route<E, Output = E>>>,
-    reciever: R,
+    receiver: R,
 }
 
 impl<E, R: Receive<E>> Router<E, R> {
-    pub fn new(reciever: R) -> Self {
+    pub fn new(receiver: R) -> Self {
         Self {
             intercept: None,
-            reciever,
+            receiver,
         }
     }
 
-    pub fn with_intercept(intercept: Box<dyn Route<E, Output = E>>, reciever: R) -> Self {
+    pub fn with_intercept(intercept: Box<dyn Route<E, Output = E>>, receiver: R) -> Self {
         Self {
             intercept: Some(intercept),
-            reciever,
+            receiver,
         }
     }
 
@@ -53,30 +53,30 @@ impl<E, R: Receive<E>> Router<E, R> {
         Self::with_intercept(Box::new(Router::new(intercept)), receiver)
     }
 
-    pub fn new_exposed(reciever: R) -> Router<E, Exposed<E, R>> {
+    pub fn new_exposed(receiver: R) -> Router<E, Exposed<E, R>> {
         Router {
             intercept: None,
-            reciever: Exposed::new(reciever),
+            receiver: Exposed::new(receiver),
         }
     }
 
     pub fn new_exposed_with_viewers(
-        reciever: R,
+        receiver: R,
         viewers: ReassignableCountedMap<usize, Box<dyn View<E>>>,
     ) -> Router<E, Exposed<E, R>> {
         Router {
             intercept: None,
-            reciever: Exposed::with_viewers(viewers, reciever),
+            receiver: Exposed::with_viewers(viewers, receiver),
         }
     }
 
     pub fn new_exposed_with_intercept(
         intercept: Box<dyn Route<E, Output = E>>,
-        reciever: R,
+        receiver: R,
     ) -> Router<E, Exposed<E, R>> {
         Router {
             intercept: Some(intercept),
-            reciever: Exposed::new(reciever),
+            receiver: Exposed::new(receiver),
         }
     }
 
@@ -90,12 +90,12 @@ impl<E, R: Receive<E>> Router<E, R> {
         Router::new_exposed_with_intercept(Box::new(Router::new(intercept)), receiver)
     }
 
-    pub fn get_reciever(&self) -> &R {
-        &self.reciever
+    pub fn get_receiver(&self) -> &R {
+        &self.receiver
     }
 
-    pub fn get_reciever_mut(&mut self) -> &mut R {
-        &mut self.reciever
+    pub fn get_receiver_mut(&mut self) -> &mut R {
+        &mut self.receiver
     }
 
     pub fn get_intercept(&self) -> Option<&dyn Route<E, Output = E>> {
@@ -145,7 +145,7 @@ impl<E, R: Receive<E>> Receive<E> for Router<E, R> {
             event
         };
 
-        self.reciever.send(event)
+        self.receiver.send(event)
     }
 }
 

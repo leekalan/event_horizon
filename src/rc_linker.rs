@@ -20,7 +20,7 @@ impl<R> RcLinker<R> {
         }
     }
 
-    pub fn get_reciever(&self) -> &RefCell<Option<R>> {
+    pub fn get_receiver(&self) -> &RefCell<Option<R>> {
         self
     }
 

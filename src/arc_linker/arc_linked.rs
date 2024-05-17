@@ -11,7 +11,7 @@ pub struct ArcLinked<R> {
 }
 
 impl<R> ArcLinked<R> {
-    pub fn get_reciever(&self) -> &Mutex<Option<R>> {
+    pub fn get_receiver(&self) -> &Mutex<Option<R>> {
         self.link.as_ref()
     }
 }
