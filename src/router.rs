@@ -161,3 +161,26 @@ impl<E, R: Receive<E>> Route<E> for Router<E, R> {
         self.intercept.take()
     }
 }
+
+impl<E, R: Receive<E> + Default> Default for Router<E, R> {
+    fn default() -> Self {
+        Self::new(R::default())
+    }
+}
+
+impl<E, R: Receive<E> + std::fmt::Debug> std::fmt::Debug for Router<E, R> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{{")?;
+        match self.intercept {
+            Some(_) => write!(f, "intercepted, ")?,
+            None => write!(f, "no intercept, ")?,
+        }
+        write!(f, "receiver: {:?}}}", self.receiver)
+    }
+}
+
+impl<E, R: Receive<E> + std::fmt::Display> std::fmt::Display for Router<E, R> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.receiver.fmt(f)
+    }
+}

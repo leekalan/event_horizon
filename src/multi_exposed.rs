@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+use counted_map::ReassignableCountedMap;
+
 pub trait MultiExpose<I: ?Sized> {
     fn get_viewers(&self) -> &ReassignableCountedMap<usize, Box<I>>;
     fn add_viewer(&mut self, other: Box<I>) -> Result<usize, counted_map::HashMapFull>;
@@ -34,6 +36,10 @@ macro_rules! multi_exposed {
             pub fn get_receiver_mut(&mut self) -> &mut R {
                 &mut self.receiver
             }
+
+            $(pub fn $viewers(&self) -> &$crate::event_horizon::counted_map::ReassignableCountedMap<usize, Box<dyn $I>> {
+                &self.$viewers
+            })*
         }
 
         $($(impl<R: $crate::event_horizon::receive::Receive<$E, Output = $Output>> $crate::event_horizon::receive::Receive<$E> for $Name<R> {
@@ -75,9 +81,29 @@ macro_rules! multi_exposed {
                 self.$viewers.remove(id)
             }
         })*
+
+        impl<R> Default for $Name<R> where R: Default {
+            fn default() -> Self {
+                Self::new(R::default())
+            }
+        }
+
+        impl<R> std::fmt::Debug for $Name<R> where R: std::fmt::Debug {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, "{{[")?;
+                $crate::event_horizon::multi_router::list_helper!(f, $($viewers, self.$viewers.len()),*);
+                write!(f, "], ")?;
+                write!(f, "{:?}}}", self.receiver)
+            }
+        }
+
+        impl<R> std::fmt::Display for $Name<R> where R: std::fmt::Display {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                self.receiver.fmt(f)
+            }
+        }
     };
 }
 
-use counted_map::ReassignableCountedMap;
 pub(crate) use multi_exposed;
 pub(crate) use multi_exposed_trait;

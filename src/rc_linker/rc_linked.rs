@@ -5,7 +5,7 @@ use crate::{
     view::{DeleteView, View},
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct RcLinked<R> {
     pub(super) link: Rc<RefCell<Option<R>>>,
 }
@@ -32,6 +32,29 @@ impl<E, R: View<E>> View<E> for RcLinked<R> {
         match self.link.borrow_mut().as_mut() {
             Some(viewer) => viewer.view(event),
             None => Some(DeleteView),
+        }
+    }
+}
+
+impl<R: std::fmt::Debug> std::fmt::Debug for RcLinked<R> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{{links: {}, receiver: {:?}}}",
+            Rc::strong_count(&self.link),
+            self.link
+        )
+    }
+}
+
+impl<R: std::fmt::Display> std::fmt::Display for RcLinked<R> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.link.try_borrow() {
+            Ok(r) => match r.as_ref() {
+                Some(v) => v.fmt(f),
+                None => write!(f, "<deleted>"),
+            },
+            Err(_) => write!(f, "<borrowed>"),
         }
     }
 }

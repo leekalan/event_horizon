@@ -12,7 +12,7 @@ pub trait Receive<E> {
     fn send(&mut self, event: E) -> ReceiverResult<E, Self::Output>;
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum ReceiverResult<E, T> {
     Continue(T),
     Stop,
@@ -49,6 +49,24 @@ impl<E, R: Receive<E>> Receive<E> for Rc<RefCell<R>> {
 
     fn send(&mut self, event: E) -> ReceiverResult<E, Self::Output> {
         self.borrow_mut().send(event)
+    }
+}
+
+// Rc + Mutex
+impl<E, R: Receive<E>> Receive<E> for Rc<Mutex<R>> {
+    type Output = R::Output;
+
+    fn send(&mut self, event: E) -> ReceiverResult<E, Self::Output> {
+        self.lock().unwrap().send(event)
+    }
+}
+
+// Rc + RwLock
+impl<E, R: Receive<E>> Receive<E> for Rc<RwLock<R>> {
+    type Output = R::Output;
+
+    fn send(&mut self, event: E) -> ReceiverResult<E, Self::Output> {
+        self.write().unwrap().send(event)
     }
 }
 

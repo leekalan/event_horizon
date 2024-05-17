@@ -7,7 +7,7 @@ use std::{
 
 use self::arc_linked::ArcLinked;
 
-#[derive(Debug)]
+#[derive(Clone)]
 pub struct ArcLinker<R> {
     receiver: Arc<Mutex<Option<R>>>,
 }
@@ -45,5 +45,34 @@ impl<R> Deref for ArcLinker<R> {
 impl<R> Drop for ArcLinker<R> {
     fn drop(&mut self) {
         *self.receiver.lock().unwrap() = None;
+    }
+}
+
+impl<R: Default> Default for ArcLinker<R> {
+    fn default() -> Self {
+        Self::new(R::default())
+    }
+}
+
+impl<R: std::fmt::Debug> std::fmt::Debug for ArcLinker<R> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{{links: {}, receiver: {:?}}}",
+            Arc::strong_count(&self.receiver),
+            self.receiver
+        )
+    }
+}
+
+impl<R: std::fmt::Display> std::fmt::Display for ArcLinker<R> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.receiver.try_lock() {
+            Ok(lock) => match lock.deref() {
+                Some(value) => value.fmt(f),
+                None => write!(f, "<deleted>"),
+            },
+            Err(_) => write!(f, "<locked>"),
+        }
     }
 }

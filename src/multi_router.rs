@@ -2,7 +2,7 @@
 
 macro_rules! list_helper {
     ($f:ident, $last:ident, $value:expr) => {
-        write!($f, "{}: {}",stringify!($last), $value)
+        write!($f, "{}: {}",stringify!($last), $value)?;
     };
     ($f:ident, $first:ident, $value:expr, $($rest:ident, $rest_value:expr),*) => {
         write!($f, "{}: {}, ",stringify!($first), $value)?;
@@ -127,13 +127,13 @@ macro_rules! multi_router {
 
         impl<R> std::fmt::Debug for $Name<R> where R: std::fmt::Debug {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                write!(f, "[")?;
+                write!(f, "{{[")?;
                 $crate::event_horizon::multi_router::list_helper!(f, $($intercept, match self.$intercept.as_ref() {
-                    Some(_) => "active",
-                    None => "none",
+                    Some(_) => "intercepted",
+                    None => "n/a",
                 }),*);
                 write!(f, "], ")?;
-                write!(f, "{:?}", self.receiver)
+                write!(f, "{:?}}}", self.receiver)
             }
         }
 

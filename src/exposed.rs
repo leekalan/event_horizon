@@ -74,3 +74,26 @@ impl<E, R: Receive<E>> Receive<E> for Exposed<E, R> {
         self.receiver.send(event)
     }
 }
+
+impl<E, R: Receive<E> + Default> Default for Exposed<E, R> {
+    fn default() -> Self {
+        Self::new(R::default())
+    }
+}
+
+impl<E, R: Receive<E> + std::fmt::Debug> std::fmt::Debug for Exposed<E, R> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{{viewers: {}, receiver: {:?}}}",
+            self.viewers.len(),
+            self.receiver
+        )
+    }
+}
+
+impl<E, R: Receive<E> + std::fmt::Display> std::fmt::Display for Exposed<E, R> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.receiver.fmt(f)
+    }
+}
