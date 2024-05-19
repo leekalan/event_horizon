@@ -3,8 +3,9 @@ pub mod rc_linked;
 use std::{
     cell::{Ref, RefCell, RefMut},
     ops::Deref,
-    rc::Rc,
 };
+
+use compact_rc::Rc;
 
 use self::rc_linked::RcLinked;
 

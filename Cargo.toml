@@ -9,3 +9,4 @@ edition = "2021"
 
 [dependencies]
 counted_map = "0.3.0"
+compact-rc = "0.5.5"

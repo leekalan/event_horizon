@@ -9,6 +9,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1fdabc7756949593fe60f30ec81974b613357de856987752631dea1e3394c80"
 
 [[package]]
+name = "compact-rc"
+version = "0.5.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3af20e6006027c82d664616a6dd15cc99c8fdba96152b8138ce61993fdc993f4"
+
+[[package]]
 name = "counted_map"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -21,6 +27,7 @@ dependencies = [
 name = "data-router"
 version = "0.3.0"
 dependencies = [
+ "compact-rc",
  "counted_map",
 ]
 
